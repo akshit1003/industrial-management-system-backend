@@ -36,6 +36,11 @@ app.use('/api/reports', reportRoutes);
 // Error handling middleware
 app.use(errorHandler);
 
+app.get('/', (req, res) => {
+  res.send('Welcome to the E-commerce API');
+}
+);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
