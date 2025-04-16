@@ -89,16 +89,19 @@ exports.updateRawMaterialQuantity = async (req, res) => {
 
 exports.checkLowStock = async (req, res) => {
   try {
-    const rawMaterialsSnapshot = await db.collection('rawMaterials')
-      .where('quantity', '<=', db.FieldPath.documentId('reorderLevel'))
-      .get();
+    // Get all raw materials
+    const rawMaterialsSnapshot = await db.collection('rawMaterials').get();
     
     const lowStockItems = [];
+    // Filter the ones where quantity <= reorderLevel
     rawMaterialsSnapshot.forEach(doc => {
-      lowStockItems.push({
-        id: doc.id,
-        ...doc.data()
-      });
+      const data = doc.data();
+      if (data.quantity <= data.reorderLevel) {
+        lowStockItems.push({
+          id: doc.id,
+          ...data
+        });
+      }
     });
     
     res.status(200).json(lowStockItems);
