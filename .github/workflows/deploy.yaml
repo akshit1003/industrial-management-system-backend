@@ -7,15 +7,16 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Google Auth
         id: auth
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-      
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
       
@@ -25,13 +26,11 @@ jobs:
       
       - name: Build and push Docker image
         run: |
-          gcloud builds submit --tag gcr.io/industrial-management-sy-6b3fd/industry-management-system:ed1804b7faa66b022d05af11157aa807d4118468 --gcs-log-dir=gs://industry-management-system-build-logs/build-logs/
-      
-      - name: Deploy to Cloud Run
+          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/industry-management-backend:${{ github.sha }} --gcs-log-dir=gs://industry-management-system-build-logs/build-logs/
+
+      - name: Create env-vars.yaml
         run: |
-          # Create the env-vars.yaml file
           cat > env-vars.yaml << EOF
-          FIREBASE_SERVICE_ACCOUNT_KEY: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}'
           FIREBASE_API_KEY: '${{ secrets.FIREBASE_API_KEY }}'
           FIREBASE_AUTH_DOMAIN: '${{ secrets.FIREBASE_AUTH_DOMAIN }}'
           FIREBASE_PROJECT_ID: '${{ secrets.FIREBASE_PROJECT_ID }}'
@@ -39,13 +38,14 @@ jobs:
           FIREBASE_MESSAGING_SENDER_ID: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}'
           FIREBASE_APP_ID: '${{ secrets.FIREBASE_APP_ID }}'
           EOF
-    
-          # Deploy to Cloud Run - fixed command format
+
+      - name: Deploy to Cloud Run
+        run: |
           gcloud run deploy industry-management-system \
-            --image=gcr.io/industrial-management-sy-6b3fd/industry-management-system:${{ github.sha }} \
-            --platform=managed \
-            --region=asia-south2 \
-            --port=5000 \
-            --env-vars-file=env-vars.yaml \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/industry-management-system:${{ github.sha }} \
+            --platform managed \
+            --region asia-south2 \
+            --port 8000 \
+            --env-vars-file env-vars.yaml \
             --allow-unauthenticated \
-            --project=industrial-management-sy-6b3fd
+            --project ${{ secrets.GCP_PROJECT_ID }}
