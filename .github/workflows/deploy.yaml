@@ -25,12 +25,13 @@ jobs:
       
       - name: Build and push Docker image
         run: |
-          gcloud builds submit --tag gcr.io/industrial-management-sy-6b3fd/industry-management-system-build-logs/build-logs/
+          gcloud builds submit --tag gcr.io/industrial-management-sy-6b3fd/industry-management-system:${{ github.sha }} --gcs-log-dir=gs://industry-management-system-build-logs/build-logs/
       
       - name: Deploy to Cloud Run
         run: |
           # Create the env-vars.yaml file
           cat > env-vars.yaml << EOF
+          FIREBASE_SERVICE_ACCOUNT_KEY: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}'
           FIREBASE_API_KEY: '${{ secrets.FIREBASE_API_KEY }}'
           FIREBASE_AUTH_DOMAIN: '${{ secrets.FIREBASE_AUTH_DOMAIN }}'
           FIREBASE_PROJECT_ID: '${{ secrets.FIREBASE_PROJECT_ID }}'
