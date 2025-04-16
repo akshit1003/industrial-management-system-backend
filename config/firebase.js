@@ -1,41 +1,33 @@
-const path = require("path");
 const admin = require("firebase-admin");
+const dotenv = require("dotenv");
 
-// Log the paths to help with debugging
-// console.log("Service Account Path:", path.resolve(__dirname, "../ServiceAccountKey.json"));
-// console.log("Current Working Directory:", process.cwd());
+dotenv.config();
 
-// Initialize Firebase Admin
 let app, db, auth, storage;
 
 try {
-  // Load the service account file
-  const serviceAccount = require(path.resolve(__dirname, "../ServiceAccountKey.json"));
-  // console.log("Service Account loaded successfully");
-  // console.log("Project ID:", serviceAccount.project_id);
+  // Parse the service account key from the environment variable
+  const rawServiceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
+
+  if (rawServiceAccount.private_key && rawServiceAccount.private_key.includes("\\n")) {
+    rawServiceAccount.private_key = rawServiceAccount.private_key.replace(/\\n/g, "\n");
+  }
 
   // Initialize Firebase Admin
   app = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: "industrial-management-sy-6b3fd.appspot.com",
+    credential: admin.credential.cert(rawServiceAccount),
+    storageBucket: `${rawServiceAccount.project_id}.appspot.com`,
   });
+
   console.log("Firebase Admin initialized successfully");
 
-  // Initialize Firestore
+  // Initialize Firebase services
   db = admin.firestore();
-
-  // Initialize Firebase Auth
   auth = admin.auth();
-
-  // Initialize Firebase Storage
   storage = admin.storage();
+
 } catch (error) {
-  console.error(
-    "Error loading service account or initializing Firebase:",
-    error
-  );
-  // You might want to throw the error here to prevent the app from continuing
-  // with uninitialized Firebase services
+  console.error("Error loading service account or initializing Firebase:", error);
   throw error;
 }
 
