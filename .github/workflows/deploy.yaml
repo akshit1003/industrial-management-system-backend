@@ -40,12 +40,11 @@ jobs:
           FIREBASE_APP_ID: '${{ secrets.FIREBASE_APP_ID }}'
           EOF
     
-          # Deploy to Cloud Run
           gcloud run deploy industry-management-system \
             --image=gcr.io/industrial-management-sy-6b3fd/industry-management-system:${{ github.sha }} \
+            --memory=512Mi \
             --platform=managed \
             --region=asia-south2 \
             --port=5000 \
             --env-vars-file=env-vars.yaml \
-            --allow-unauthenticated \
-            --project=industrial-management-sy-6b3fd
+            --allow-unauthenticated
