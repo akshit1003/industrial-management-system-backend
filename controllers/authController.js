@@ -45,6 +45,7 @@ exports.register = async (req, res) => {
 
     // Store additional user data in Firestore
     await db.collection('users').doc(user.uid).set({
+      uid: user.uid,
       email,
       name,
       role: role || 'customer',
@@ -98,9 +99,16 @@ exports.login = async (req, res) => {
     
     if (userDoc.exists) {
       userData = userDoc.data();
+
+      if (!userData.uid) {
+        await db.collection('users').doc(user.uid).update({ uid: user.uid });
+        userData.uid = user.uid;
+      }
+      
     } else {
       // Create user document if it doesn't exist
       userData = { 
+        uid: user.uid,
         email: user.email,
         name: user.displayName || email.split('@')[0],
         role: 'customer',
