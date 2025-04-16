@@ -25,7 +25,16 @@ jobs:
       
       - name: Build and push Docker image
         run: |
-          gcloud builds submit --tag gcr.io/{{ secrets.GCP_PROJECT_ID }}/industry-management-system:${{ github.sha }} --gcs-log-dir=gs://industry-management-system-build-logs/build-logs/
+          # Enable required APIs
+          gcloud services enable cloudbuild.googleapis.com --project=industrial-management-sy-6b3fd
+          
+          # Create build logs bucket if it doesn't exist
+          gcloud storage buckets describe gs://industry-management-system-build-logs --project=industrial-management-sy-6b3fd || \
+          gcloud storage buckets create gs://industry-management-system-build-logs --location=asia-south2 --project=industrial-management-sy-6b3fd
+          
+          # Build and push image - using the dynamic github.sha
+          gcloud builds submit --tag gcr.io/industrial-management-sy-6b3fd/industry-management-system:${{ github.sha }} \
+            --project=industrial-management-sy-6b3fd
       
       - name: Deploy to Cloud Run
         run: |
@@ -39,9 +48,9 @@ jobs:
           FIREBASE_APP_ID: '${{ secrets.FIREBASE_APP_ID }}'
           EOF
     
-          # Deploy to Cloud Run - fixed command format
+          # Deploy to Cloud Run with the same image tag used in the build step
           gcloud run deploy industry-management-system \
-            --image=gcr.io/{{ secrets.GCP_PROJECT_ID }}/industry-management-system:${{ github.sha }} \
+            --image=gcr.io/industrial-management-sy-6b3fd/industry-management-system:${{ github.sha }} \
             --platform=managed \
             --region=asia-south2 \
             --port=5000 \
