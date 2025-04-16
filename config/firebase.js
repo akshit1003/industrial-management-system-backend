@@ -11,8 +11,8 @@ let app, db, auth, storage;
 try {
   // Load the service account file
   const serviceAccount = require(path.resolve(__dirname, "../ServiceAccountKey.json"));
-  console.log("Service Account loaded successfully");
-  console.log("Project ID:", serviceAccount.project_id);
+  // console.log("Service Account loaded successfully");
+  // console.log("Project ID:", serviceAccount.project_id);
 
   // Initialize Firebase Admin
   app = admin.initializeApp({
