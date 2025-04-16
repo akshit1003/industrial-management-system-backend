@@ -22,9 +22,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          gcloud builds submit . \
-            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ims-backend:${{ github.sha }} \
-            --gcs-log-dir=gs://industry-management-system-build-logs/build-logs/
+          gcloud builds submit . --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ims-backend:${{ github.sha }} --gcs-log-dir=gs://industry-management-system-build-logs/build-logs/
 
       - name: Create env-vars.yaml
         run: |
