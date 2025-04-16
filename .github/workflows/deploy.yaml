@@ -45,7 +45,7 @@ jobs:
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/industry-management-system:${{ github.sha }} \
             --platform managed \
             --region asia-south2 \
-            --port 8000 \
+            --port 5000 \
             --env-vars-file env-vars.yaml \
             --allow-unauthenticated \
             --project ${{ secrets.GCP_PROJECT_ID }}
